@@ -22,6 +22,9 @@ class InventarioBarApp:
         # Cargar inventario desde el archivo
         self.inventario = self.cargar_inventario()
 
+        # Cargar ganancias del mes desde el archivo
+        self.ganancias_mes_actual = self.cargar_ganancias_mes()
+
         # Variables para seguimiento de ganancias y costos
         self.ingresos_totales = 0
         self.costos_totales = 0
@@ -54,28 +57,38 @@ class InventarioBarApp:
         self.entry_precio_venta = tk.Entry(root, textvariable=self.precio_venta_var)
         self.entry_precio_venta.grid(row=2, column=1, padx=10, pady=10)
 
-        self.lbl_cantidad = tk.Label(root, text="Cantidad:")
-        self.lbl_cantidad.grid(row=3, column=0, padx=10, pady=10)
+        # Nuevos campos para cantidad de stock y cantidad venta
+        self.lbl_cantidad_stock = tk.Label(root, text="Cantidad de Stock:")
+        self.lbl_cantidad_stock.grid(row=3, column=0, padx=10, pady=10)
 
-        self.cantidad_var = tk.StringVar()
-        self.entry_cantidad = tk.Entry(root, textvariable=self.cantidad_var)
-        self.entry_cantidad.grid(row=3, column=1, padx=10, pady=10)
+        self.cantidad_stock_var = tk.StringVar()
+        self.entry_cantidad_stock = tk.Entry(root, textvariable=self.cantidad_stock_var)
+        self.entry_cantidad_stock.grid(row=3, column=1, padx=10, pady=10)
+
+        self.lbl_cantidad_venta = tk.Label(root, text="Cantidad Venta:")
+        self.lbl_cantidad_venta.grid(row=4, column=0, padx=10, pady=10)
+
+        self.cantidad_venta_var = tk.StringVar()
+        self.entry_cantidad_venta = tk.Entry(root, textvariable=self.cantidad_venta_var)
+        self.entry_cantidad_venta.grid(row=4, column=1, padx=10, pady=10)
 
         self.btn_registrar_venta = tk.Button(root, text="Registrar Venta", command=self.registrar_venta)
-        self.btn_registrar_venta.grid(row=4, column=0, columnspan=2, pady=10)
+        self.btn_registrar_venta.grid(row=5, column=0, columnspan=2, pady=10)
 
         self.btn_agregar_stock = tk.Button(root, text="Agregar Stock", command=self.agregar_stock)
-        self.btn_agregar_stock.grid(row=5, column=0, columnspan=2, pady=10)
+        self.btn_agregar_stock.grid(row=6, column=0, columnspan=2, pady=10)
 
         self.btn_agregar_producto = tk.Button(root, text="Agregar Producto", command=self.agregar_producto)
-        self.btn_agregar_producto.grid(row=6, column=0, columnspan=2, pady=10)
+        self.btn_agregar_producto.grid(row=7, column=0, columnspan=2, pady=10)
 
         self.lbl_ganancias = tk.Label(root, text="Ganancias Totales: $0")
-        self.lbl_ganancias.grid(row=7, column=0, columnspan=2, pady=10)
+        self.lbl_ganancias.grid(row=8, column=0, columnspan=2, pady=10)
+        # GANANCIAS MESSSSSSS
+        self.lbl_ganancias_mes_actual = tk.Label(root, text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
+        self.lbl_ganancias_mes_actual.grid(row=9, column=0, columnspan=2, pady=10)
 
-        self.lbl_ganancias_mes = tk.Label(root, text = "Ganancias del mes: $0")
-        self.lbl_ganancias_mes.grid(row=8, column=0, columnspan=2, pady=10)
-
+        self.btn_limpiar_registro_mes = tk.Button(root, text="Limpiar Registro del Mes", command=self.limpiar_registro_mes)
+        self.btn_limpiar_registro_mes.grid(row=10, column=0, columnspan=2, pady=10)
         # Mostrar inventario
         style=ttk.Style()
 
@@ -93,10 +106,33 @@ class InventarioBarApp:
 
         self.mostrar_inventario()
         self.my_tree.tag_configure('orow', background="#EEEEEE", font=('Arial bold',15))
-        self.my_tree.grid(row=9, column=5, columnspan=5, padx=10, pady=10)
+        self.my_tree.grid(row=10, column=5, columnspan=5, padx=10, pady=10)
 
-        # Guardar inventario al cerrar la aplicación
-        root.protocol("WM_DELETE_WINDOW", self.guardar_inventario_al_cerrar)
+        # Guardar inventario y ganancias del mes al cerrar la aplicación
+        root.protocol("WM_DELETE_WINDOW", self.guardar_inventario_y_ganancias_mes_al_cerrar)
+        
+    def limpiar_registro_mes(self):
+        self.ganancias_mes_actual = 0
+        self.lbl_ganancias_mes_actual.config(text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
+        self.guardar_ganancias_mes()
+
+    def cargar_ganancias_mes(self):
+        try:
+            with open("ganancias_mes.json", "r") as file:
+                ganancias_mes = json.load(file)
+            return ganancias_mes.get("ganancias_mes_actual", 0)
+        except FileNotFoundError:
+            return 0
+        except json.JSONDecodeError:
+            messagebox.showerror("Error", "Error al cargar las ganancias del mes desde el archivo.")
+            return 0
+
+    def guardar_ganancias_mes(self):
+        try:
+            with open("ganancias_mes.json", "w") as file:
+                json.dump({"ganancias_mes_actual": self.ganancias_mes_actual}, file)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al guardar las ganancias del mes: {str(e)}")
 
     def actualizar_precios(self, event):
         producto_seleccionado = self.producto_var.get()
@@ -110,40 +146,42 @@ class InventarioBarApp:
 
     def registrar_venta(self):
         producto = self.producto_var.get()
-        cantidad = self.cantidad_var.get()
+        cantidad_venta = self.cantidad_venta_var.get()
 
         try:
-            cantidad = int(cantidad)
-            if cantidad <= 0:
-                raise ValueError("La cantidad debe ser un número positivo.")
+            cantidad_venta = int(cantidad_venta)
+            if cantidad_venta <= 0:
+                raise ValueError("La cantidad de venta debe ser un número positivo.")
         except ValueError as e:
-            messagebox.showerror("Error", f"Error en la cantidad: {str(e)}")
+            messagebox.showerror("Error", f"Error en la cantidad de venta: {str(e)}")
             return
 
         if producto in self.inventario:
-            if self.inventario[producto]["stock"] >= cantidad:
+            if self.inventario[producto]["stock"] >= cantidad_venta:
                 # Eliminar símbolo de dólar y espacios antes de convertir a float
+                precio_compra = float(self.precio_compra_var.get().replace('$', '').replace(',', ''))
+                precio_venta = float(self.precio_venta_var.get().replace('$', '').replace(',', ''))
                 precio_compra = self.inventario[producto]["precio_compra"]
                 precio_venta = self.inventario[producto]["precio_venta"]
 
-                costo_total = precio_compra * cantidad
-                ingreso_total = precio_venta * cantidad
+                costo_total = precio_compra * cantidad_venta
+                ingreso_total = precio_venta * cantidad_venta
 
-                self.inventario[producto]["stock"] -= cantidad
+                self.inventario[producto]["stock"] -= cantidad_venta
                 self.costos_totales += costo_total
                 self.ingresos_totales += ingreso_total
 
                 # Calcular ganancia como ingreso total - costo total
                 ganancia_total = ingreso_total - costo_total
                 self.ganancias_venta = ganancia_total
-                self.ganancias_mes += ganancia_total
-
+                self.ganancias_mes_actual += ganancia_total
 
                 # Actualizar etiqueta de ganancias totales con formato de moneda colombiana
                 self.lbl_ganancias.config(text=f"Ganancias Totales: {locale.currency(int(self.ganancias_venta), grouping=True, symbol=False)}")
-                self.lbl_ganancias_mes.config(text=f"Ganancias Mes: {locale.currency(int(self.ganancias_mes), grouping=True, symbol=False)}")
+                # Actualizar etiqueta de ganancias del mes actual con formato de moneda colombiana
+                self.lbl_ganancias_mes_actual.config(text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
 
-                messagebox.showinfo("Venta Registrada", f"Venta de {cantidad} unidades de {producto} registrada.\n"
+                messagebox.showinfo("Venta Registrada", f"Venta de {cantidad_venta} unidades de {producto} registrada.\n"
                                                        f"Ganancia: {locale.currency(int(ganancia_total), grouping=True, symbol=False)}")
             else:
                 messagebox.showerror("Error", "No hay suficiente stock para realizar la venta.")
@@ -154,19 +192,19 @@ class InventarioBarApp:
 
     def agregar_stock(self):
         producto = self.producto_var.get()
-        cantidad = self.cantidad_var.get()
+        cantidad_stock = self.cantidad_stock_var.get()
 
         try:
-            cantidad = int(cantidad)
-            if cantidad <= 0:
-                raise ValueError("La cantidad debe ser un número positivo.")
+            cantidad_stock = int(cantidad_stock)
+            if cantidad_stock <= 0:
+                raise ValueError("La cantidad de stock debe ser un número positivo.")
         except ValueError as e:
-            messagebox.showerror("Error", f"Error en la cantidad: {str(e)}")
+            messagebox.showerror("Error", f"Error en la cantidad de stock: {str(e)}")
             return
 
         if producto in self.inventario:
-            self.inventario[producto]["stock"] += cantidad
-            messagebox.showinfo("Stock Actualizado", f"Se agregaron {cantidad} unidades de {producto} al stock.")
+            self.inventario[producto]["stock"] += cantidad_stock
+            messagebox.showinfo("Stock Actualizado", f"Se agregaron {cantidad_stock} unidades de {producto} al stock.")
         else:
             messagebox.showerror("Error", "Producto no encontrado en el inventario.")
         
@@ -208,8 +246,9 @@ class InventarioBarApp:
             json.dump(self.inventario, file)
         self.mostrar_inventario()
 
-    def guardar_inventario_al_cerrar(self):
+    def guardar_inventario_y_ganancias_mes_al_cerrar(self):
         self.guardar_inventario()
+        self.guardar_ganancias_mes()
         self.root.destroy()
 
     def mostrar_inventario(self):
@@ -221,10 +260,9 @@ class InventarioBarApp:
             precio_venta = self.inventario[producto_seleccionado]["precio_venta"]
             stock = self.inventario[producto_seleccionado]["stock"]
 
-            self.my_tree.insert("", "end", values = (producto_seleccionado, locale.currency(int(precio_venta), grouping = True, symbol = False), stock), tags = ('orow'))
+            self.my_tree.insert("", "end", values=(producto_seleccionado, locale.currency(int(precio_venta), grouping=True, symbol=False), stock), tags=('orow'))
     
 if __name__ == "__main__":
     root = tk.Tk()
     app = InventarioBarApp(root)
     root.mainloop()
-     
