@@ -166,9 +166,7 @@ class InventarioBarApp:
         self.my_tree.heading("Cantidad", text="Cantidad", anchor=tk.W)
 
         scrollbar = ttk.Scrollbar(root, orient="vertical", command=self.my_tree.yview)
-        scrollbar.grid(row=10, column=7, sticky="ns")
-
-        self.my_tree.configure(yscrollcommand=scrollbar.set)
+        scrollbar.grid(row=10, column=6, sticky="ns")
 
         self.mostrar_inventario()
         self.my_tree.tag_configure('orow', background="#EEEEEE", font=('Arial bold',15))
