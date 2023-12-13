@@ -35,60 +35,124 @@ class InventarioBarApp:
         self.ganancias_mes = 0
 
         # Interfaz de usuario
+        # Manejo de inventario 
+        self.lbl_header = tk.Label(root, text="Manejo Inventario", font= ("Arial", 14, "bold"), fg= "red")
+        self.lbl_header.grid(row=0, column=1, padx=10, pady=10)
+
         self.lbl_producto = tk.Label(root, text="Producto:")
-        self.lbl_producto.grid(row=0, column=0, padx=10, pady=10)
+        self.lbl_producto.grid(row=1, column=0, padx=10, pady=10)
 
         self.producto_var = tk.StringVar()
         self.cmb_producto = ttk.Combobox(root, textvariable=self.producto_var, values=list(self.inventario.keys()))
-        self.cmb_producto.grid(row=0, column=1, padx=10, pady=10)
+        self.cmb_producto.grid(row=1, column=1, padx=10, pady=10)
         self.cmb_producto.bind("<<ComboboxSelected>>", self.actualizar_precios)
 
         self.lbl_precio_compra = tk.Label(root, text="Precio de Compra:")
-        self.lbl_precio_compra.grid(row=1, column=0, padx=10, pady=10)
+        self.lbl_precio_compra.grid(row=2, column=0, padx=10, pady=10)
 
         self.precio_compra_var = tk.StringVar()
         self.entry_precio_compra = tk.Entry(root, textvariable=self.precio_compra_var)
-        self.entry_precio_compra.grid(row=1, column=1, padx=10, pady=10)
+        self.entry_precio_compra.grid(row=2, column=1, padx=10, pady=10)
 
         self.lbl_precio_venta = tk.Label(root, text="Precio de Venta:")
-        self.lbl_precio_venta.grid(row=2, column=0, padx=10, pady=10)
+        self.lbl_precio_venta.grid(row=3, column=0, padx=10, pady=10)
 
         self.precio_venta_var = tk.StringVar()
         self.entry_precio_venta = tk.Entry(root, textvariable=self.precio_venta_var)
-        self.entry_precio_venta.grid(row=2, column=1, padx=10, pady=10)
+        self.entry_precio_venta.grid(row=3, column=1, padx=10, pady=10)
 
-        # Nuevos campos para cantidad de stock y cantidad venta
+        # Nuevos campos para cantidad de stock
         self.lbl_cantidad_stock = tk.Label(root, text="Cantidad de Stock:")
-        self.lbl_cantidad_stock.grid(row=3, column=0, padx=10, pady=10)
+        self.lbl_cantidad_stock.grid(row=4, column=0, padx=10, pady=10)
 
         self.cantidad_stock_var = tk.StringVar()
         self.entry_cantidad_stock = tk.Entry(root, textvariable=self.cantidad_stock_var)
-        self.entry_cantidad_stock.grid(row=3, column=1, padx=10, pady=10)
-
-        self.lbl_cantidad_venta = tk.Label(root, text="Cantidad Venta:")
-        self.lbl_cantidad_venta.grid(row=4, column=0, padx=10, pady=10)
-
-        self.cantidad_venta_var = tk.StringVar()
-        self.entry_cantidad_venta = tk.Entry(root, textvariable=self.cantidad_venta_var)
-        self.entry_cantidad_venta.grid(row=4, column=1, padx=10, pady=10)
-
-        self.btn_registrar_venta = tk.Button(root, text="Registrar Venta", command=self.registrar_venta)
-        self.btn_registrar_venta.grid(row=5, column=0, columnspan=2, pady=10)
+        self.entry_cantidad_stock.grid(row=4, column=1, padx=10, pady=10)
 
         self.btn_agregar_stock = tk.Button(root, text="Agregar Stock", command=self.agregar_stock)
-        self.btn_agregar_stock.grid(row=6, column=0, columnspan=2, pady=10)
+        self.btn_agregar_stock.grid(row=7, column=0, columnspan=2, pady=10)
 
         self.btn_agregar_producto = tk.Button(root, text="Agregar Producto", command=self.agregar_producto)
-        self.btn_agregar_producto.grid(row=7, column=0, columnspan=2, pady=10)
+        self.btn_agregar_producto.grid(row=8, column=0, columnspan=2, pady=10)
 
-        self.lbl_ganancias = tk.Label(root, text="Ganancias Totales: $0")
-        self.lbl_ganancias.grid(row=8, column=0, columnspan=2, pady=10)
         # GANANCIAS MESSSSSSS
         self.lbl_ganancias_mes_actual = tk.Label(root, text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
-        self.lbl_ganancias_mes_actual.grid(row=9, column=0, columnspan=2, pady=10)
+        self.lbl_ganancias_mes_actual.grid(row=10, column=0, columnspan=2, pady=10)
 
         self.btn_limpiar_registro_mes = tk.Button(root, text="Limpiar Registro del Mes", command=self.limpiar_registro_mes)
-        self.btn_limpiar_registro_mes.grid(row=10, column=0, columnspan=2, pady=10)
+        self.btn_limpiar_registro_mes.grid(row=11, column=0, columnspan=2, pady=10)
+        
+        # Interfas de ventas
+        self.lbl_header = tk.Label(root, text="Ventas", font= ("Arial", 14, "bold"), fg= "red")
+        self.lbl_header.grid(row=0, column=3, padx=10, pady=10)
+
+        #1
+        self.lbl_producto_venta1 = tk.Label(root, text="Producto de venta 1:")
+        self.lbl_producto_venta1.grid(row=1, column=2, padx=10, pady=10)
+
+        self.producto_venta1_var = tk.StringVar()
+        self.cmb_producto_venta1 = ttk.Combobox(root, textvariable=self.producto_venta1_var, values=list(self.inventario.keys()))
+        self.cmb_producto_venta1.grid(row=1, column=3, padx=10, pady=10)
+        self.cmb_producto_venta1.bind("<<ComboboxSelected>>", self.actualizar_precios)
+
+        self.lbl_cantidad_venta1 = tk.Label(root, text="Cantidad:")
+        self.lbl_cantidad_venta1.grid(row=1, column=4, padx=10, pady=10)
+
+        self.cantidad_venta1_var = tk.StringVar()
+        self.entry_cantidad_venta1 = tk.Entry(root, textvariable=self.cantidad_venta1_var)
+        self.entry_cantidad_venta1.grid(row=1, column=5, padx=10, pady=10)
+
+        #2
+        self.lbl_producto_venta2 = tk.Label(root, text="Producto de venta 2:")
+        self.lbl_producto_venta2.grid(row=2, column=2, padx=10, pady=10)
+
+        self.producto_venta2_var = tk.StringVar()
+        self.cmb_producto_venta2 = ttk.Combobox(root, textvariable=self.producto_venta2_var, values=list(self.inventario.keys()))
+        self.cmb_producto_venta2.grid(row=2, column=3, padx=10, pady=10)
+        self.cmb_producto_venta2.bind("<<ComboboxSelected>>", self.actualizar_precios)
+
+        self.lbl_cantidad_venta2 = tk.Label(root, text="Cantidad:")
+        self.lbl_cantidad_venta2.grid(row=2, column=4, padx=10, pady=10)
+
+        self.cantidad_venta2_var = tk.StringVar()
+        self.entry_cantidad_venta2 = tk.Entry(root, textvariable=self.cantidad_venta2_var)
+        self.entry_cantidad_venta2.grid(row=2, column=5, padx=10, pady=10)
+
+        #3
+        self.lbl_producto_venta3 = tk.Label(root, text="Producto de venta 3:")
+        self.lbl_producto_venta3.grid(row=3, column=2, padx=10, pady=10)
+
+        self.producto_venta3_var = tk.StringVar()
+        self.cmb_producto_venta3 = ttk.Combobox(root, textvariable=self.producto_venta3_var, values=list(self.inventario.keys()))
+        self.cmb_producto_venta3.grid(row=3, column=3, padx=10, pady=10)
+
+        self.cmb_producto_venta3.bind("<<ComboboxSelected>>", self.actualizar_precios)
+        self.lbl_cantidad_venta3 = tk.Label(root, text="Cantidad:")
+        self.lbl_cantidad_venta3.grid(row=3, column=4, padx=10, pady=10)
+
+        self.cantidad_venta3_var = tk.StringVar()
+        self.entry_cantidad_venta3 = tk.Entry(root, textvariable=self.cantidad_venta3_var)
+        self.entry_cantidad_venta3.grid(row=3, column=5, padx=10, pady=10)
+        
+        #4
+        self.lbl_producto_venta4 = tk.Label(root, text="Producto de venta 4:")
+        self.lbl_producto_venta4.grid(row=4, column=2, padx=10, pady=10)
+
+        self.producto_venta4_var = tk.StringVar()
+        self.cmb_producto_venta4 = ttk.Combobox(root, textvariable=self.producto_venta4_var, values=list(self.inventario.keys()))
+        self.cmb_producto_venta4.grid(row=4, column=3, padx=10, pady=10)
+
+        self.cmb_producto_venta4.bind("<<ComboboxSelected>>", self.actualizar_precios)
+        self.lbl_cantidad_venta4 = tk.Label(root, text="Cantidad:")
+        self.lbl_cantidad_venta4.grid(row=4, column=4, padx=10, pady=10)
+
+        self.cantidad_venta4_var = tk.StringVar()
+        self.entry_cantidad_venta4 = tk.Entry(root, textvariable=self.cantidad_venta4_var)
+        self.entry_cantidad_venta4.grid(row=4, column=5, padx=10, pady=10)
+
+        self.btn_registrar_venta = tk.Button(root, text="Registrar Venta", command=self.registrar_venta)
+        self.btn_registrar_venta.grid(row=6, column=2, columnspan=2, pady=10)
+
         # Mostrar inventario
         style=ttk.Style()
 
@@ -143,51 +207,87 @@ class InventarioBarApp:
             self.precio_venta_var.set(locale.currency(int(precio_venta), grouping=True))
         
         self.mostrar_inventario()
-
+            
     def registrar_venta(self):
-        producto = self.producto_var.get()
-        cantidad_venta = self.cantidad_venta_var.get()
+        producto1 = self.producto_venta1_var.get()
+        producto2 = self.producto_venta2_var.get()
+        producto3 = self.producto_venta3_var.get()
+        producto4 = self.producto_venta4_var.get()
+
+        total_valor_producto1 = total_compra_producto1 = 0
+        total_valor_producto2 = total_compra_producto2 = 0
+        total_valor_producto3 = total_compra_producto3 = 0
+        total_valor_producto4 = total_compra_producto4 = 0
 
         try:
-            cantidad_venta = int(cantidad_venta)
-            if cantidad_venta <= 0:
-                raise ValueError("La cantidad de venta debe ser un número positivo.")
-        except ValueError as e:
-            messagebox.showerror("Error", f"Error en la cantidad de venta: {str(e)}")
-            return
-
-        if producto in self.inventario:
-            if self.inventario[producto]["stock"] >= cantidad_venta:
-                # Eliminar símbolo de dólar y espacios antes de convertir a float
-                precio_compra = float(self.precio_compra_var.get().replace('$', '').replace(',', ''))
-                precio_venta = float(self.precio_venta_var.get().replace('$', '').replace(',', ''))
-                precio_compra = self.inventario[producto]["precio_compra"]
-                precio_venta = self.inventario[producto]["precio_venta"]
-
-                costo_total = precio_compra * cantidad_venta
-                ingreso_total = precio_venta * cantidad_venta
-
-                self.inventario[producto]["stock"] -= cantidad_venta
-                self.costos_totales += costo_total
-                self.ingresos_totales += ingreso_total
-
-                # Calcular ganancia como ingreso total - costo total
-                ganancia_total = ingreso_total - costo_total
-                self.ganancias_venta = ganancia_total
-                self.ganancias_mes_actual += ganancia_total
-
-                # Actualizar etiqueta de ganancias totales con formato de moneda colombiana
-                self.lbl_ganancias.config(text=f"Ganancias Totales: {locale.currency(int(self.ganancias_venta), grouping=True, symbol=False)}")
-                # Actualizar etiqueta de ganancias del mes actual con formato de moneda colombiana
-                self.lbl_ganancias_mes_actual.config(text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
-
-                messagebox.showinfo("Venta Registrada", f"Venta de {cantidad_venta} unidades de {producto} registrada.\n"
-                                                       f"Ganancia: {locale.currency(int(ganancia_total), grouping=True, symbol=False)}")
-            else:
-                messagebox.showerror("Error", "No hay suficiente stock para realizar la venta.")
-        else:
-            messagebox.showerror("Error", "Producto no encontrado en el inventario.")
+            venta1 = int(self.entry_cantidad_venta1.get())
+            if venta1 >= 0:
+                messagebox.showerror("Error", "No hay producto en el inventario")
+                return
+        except ValueError:
+            venta1 = 0
         
+        try:
+            venta2 = int(self.entry_cantidad_venta2.get())
+            if venta2 >= 0:
+                messagebox.showerror("Error", "No hay producto en el inventario")
+                return
+        except ValueError:
+            venta2 = 0
+        
+        try:
+            venta3 = int(self.entry_cantidad_venta3.get())
+            if venta3 >= 0:
+                messagebox.showerror("Error", "No hay producto en el inventario")
+                return
+        except ValueError:
+            venta3 = 0
+        
+        try:
+            venta4 = int(self.entry_cantidad_venta4.get())
+            if venta4 >= 0:
+                messagebox.showerror("Error", "No hay producto en el inventario")
+                return
+        except ValueError:
+            venta4 = 0
+
+        if producto1 in self.inventario:
+            valor_producto1 = float(self.inventario[producto1]["precio_venta"])
+            compra_producto1 = float(self.inventario[producto1]["precio_compra"])
+            total_compra_producto1 = compra_producto1 * venta1
+            total_valor_producto1 = valor_producto1 * venta1
+
+        if producto2 in self.inventario:
+            valor_producto2 = self.inventario[producto2]["precio_venta"]
+            compra_producto2 = self.inventario[producto2]["precio_compra"]
+            total_valor_producto2 = valor_producto2 * venta2
+            total_compra_producto2 = compra_producto2 * venta2
+
+        if producto3 in self.inventario:
+            valor_producto3 = self.inventario[producto3]["precio_venta"]
+            compra_producto3 = self.inventario[producto3]["precio_compra"]
+            total_valor_producto3 = valor_producto3 * venta3
+            total_compra_producto3 = compra_producto3 * venta3
+
+        if producto4 in self.inventario:
+            valor_producto4 = self.inventario[producto4]["precio_venta"]
+            compra_producto4 = self.inventario[producto4]["precio_compra"]
+            total_valor_producto4 = valor_producto4 * venta4
+            total_compra_producto4 = compra_producto4 * venta4
+        
+        ingresos_totales_total = total_valor_producto1 + total_valor_producto2 + total_valor_producto3 + total_valor_producto4
+        costos_total = total_compra_producto1 +  total_compra_producto2 +  total_compra_producto3 +  total_compra_producto4
+
+        ganancia_total = ingresos_totales_total - costos_total
+
+        ganancias_venta = ganancia_total
+
+        self.ganancias_mes_actual += ganancias_venta
+
+        # Actualizar etiqueta de ganancias del mes actual con formato de moneda colombiana
+        self.lbl_ganancias_mes_actual.config(text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
+        messagebox.showinfo("Venta Registrada", f"Ganancia: {locale.currency(int(ganancia_total), grouping=True, symbol=False)}")
+                
         self.mostrar_inventario()
 
     def agregar_stock(self):
