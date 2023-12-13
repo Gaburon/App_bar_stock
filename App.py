@@ -4,9 +4,6 @@ from tkinter import messagebox
 from tkinter import ttk
 import json
 import locale
-import schedule
-import time
-import datetime
 
 class InventarioBarApp:
 
@@ -164,16 +161,35 @@ class InventarioBarApp:
         self.my_tree.column("Precio", anchor=W, width=150)
         self.my_tree.column("Cantidad", anchor=W, width=150)
 
-        self.my_tree.heading("Nombre", text="Nombre", anchor=W)
-        self.my_tree.heading("Precio", text="Precio", anchor=W)
-        self.my_tree.heading("Cantidad", text="Cantidad", anchor=W)
+        self.my_tree.heading("Nombre", text="Nombre", anchor=tk.W)
+        self.my_tree.heading("Precio", text="Precio", anchor=tk.W)
+        self.my_tree.heading("Cantidad", text="Cantidad", anchor=tk.W)
+
+        scrollbar = ttk.Scrollbar(root, orient="vertical", command=self.my_tree.yview)
+        scrollbar.grid(row=10, column=7, sticky="ns")
+
+        self.my_tree.configure(yscrollcommand=scrollbar.set)
 
         self.mostrar_inventario()
         self.my_tree.tag_configure('orow', background="#EEEEEE", font=('Arial bold',15))
-        self.my_tree.grid(row=10, column=5, columnspan=5, padx=10, pady=10)
+        self.my_tree.grid(row=10, column=2, columnspan=5, padx=10, pady=10)
+
+        self.my_tree.heading("Nombre", text="Nombre", anchor = tk.W, command = lambda: 
+                             self.organizar_nombres(self.my_tree, "Nombre", False))
 
         # Guardar inventario y ganancias del mes al cerrar la aplicación
         root.protocol("WM_DELETE_WINDOW", self.guardar_inventario_y_ganancias_mes_al_cerrar)
+
+    #def eliminar_item(self):
+
+    def organizar_nombres(self, tv, col, reverse):
+        l = [(tv.set(k, col), k) for k in tv.get_children('')]
+        l.sort(reverse = reverse)
+
+        for index, (val, k) in enumerate(l):
+            tv.move(k, '', index)
+        
+        tv.heading(col, command = lambda: self.organizar_nombres(tv, col, not reverse))
         
     def limpiar_registro_mes(self):
         self.ganancias_mes_actual = 0
@@ -221,59 +237,101 @@ class InventarioBarApp:
 
         try:
             venta1 = int(self.entry_cantidad_venta1.get())
-            if venta1 >= 0:
-                messagebox.showerror("Error", "No hay producto en el inventario")
-                return
+
         except ValueError:
             venta1 = 0
         
         try:
             venta2 = int(self.entry_cantidad_venta2.get())
-            if venta2 >= 0:
-                messagebox.showerror("Error", "No hay producto en el inventario")
-                return
+
         except ValueError:
             venta2 = 0
         
         try:
             venta3 = int(self.entry_cantidad_venta3.get())
-            if venta3 >= 0:
-                messagebox.showerror("Error", "No hay producto en el inventario")
-                return
+
         except ValueError:
             venta3 = 0
         
         try:
             venta4 = int(self.entry_cantidad_venta4.get())
-            if venta4 >= 0:
-                messagebox.showerror("Error", "No hay producto en el inventario")
-                return
+
         except ValueError:
             venta4 = 0
+        
+        if producto1 not in self.inventario:
+            producto1 = ""
+            stock1 = -100
+        else:
+            stock1 = self.inventario[producto1]["stock"]
 
-        if producto1 in self.inventario:
+
+        if producto2 not in self.inventario:
+            producto2 = ""
+            stock2 = -100
+        else:
+            stock2 = self.inventario[producto2]["stock"]
+
+        if producto3 not in self.inventario:
+            producto3 = ""
+            stock3 = -100
+        else:
+            stock3 = self.inventario[producto3]["stock"]
+        
+        if producto4 not in self.inventario:
+            producto4 = ""
+            stock4 = -100
+        else:
+            stock4 = self.inventario[producto4]["stock"]
+
+        if venta1 >= stock1 and stock1 != -100:
+                messagebox.showerror("Error", f"No hay suficientes unidades de {producto1} en el inventario.")
+                return
+        
+        if stock1 == -100:
+            total_valor_producto1 = 0
+            total_compra_producto1 = 0
+        else:
             valor_producto1 = float(self.inventario[producto1]["precio_venta"])
             compra_producto1 = float(self.inventario[producto1]["precio_compra"])
             total_compra_producto1 = compra_producto1 * venta1
             total_valor_producto1 = valor_producto1 * venta1
 
-        if producto2 in self.inventario:
-            valor_producto2 = self.inventario[producto2]["precio_venta"]
-            compra_producto2 = self.inventario[producto2]["precio_compra"]
-            total_valor_producto2 = valor_producto2 * venta2
+        if venta2 >= stock2 and stock2 != -100 :
+                messagebox.showerror("Error", f"No hay suficientes unidades de {producto2} en el inventario.")
+                return
+        if stock2 == -100:
+            total_valor_producto2 = 0
+            total_compra_producto2 = 0
+        else:
+            valor_producto2 = float(self.inventario[producto2]["precio_venta"])
+            compra_producto2 = float(self.inventario[producto2]["precio_compra"])
             total_compra_producto2 = compra_producto2 * venta2
-
-        if producto3 in self.inventario:
-            valor_producto3 = self.inventario[producto3]["precio_venta"]
-            compra_producto3 = self.inventario[producto3]["precio_compra"]
-            total_valor_producto3 = valor_producto3 * venta3
+            total_valor_producto2 = valor_producto2 * venta2
+        
+        if venta3 >= stock3 and stock3 != -100:
+                messagebox.showerror("Error", f"No hay suficientes unidades de {producto3} en el inventario.")
+                return
+        if stock2 == -100:
+            total_valor_producto2 = 0
+            total_compra_producto2 = 0
+        else:
+            valor_producto3 = float(self.inventario[producto3]["precio_venta"])
+            compra_producto3 = float(self.inventario[producto3]["precio_compra"])
             total_compra_producto3 = compra_producto3 * venta3
-
-        if producto4 in self.inventario:
-            valor_producto4 = self.inventario[producto4]["precio_venta"]
-            compra_producto4 = self.inventario[producto4]["precio_compra"]
-            total_valor_producto4 = valor_producto4 * venta4
+            total_valor_producto3 = valor_producto3 * venta3
+        
+        if venta4 >= stock4 and stock4 != -100:
+                messagebox.showerror("Error", f"No hay suficientes unidades de {producto4} en el inventario.")
+                return
+        if stock4 == -100:
+            total_valor_producto4 = 0
+            total_compra_producto4 = 0
+        else:
+            valor_producto4 = float(self.inventario[producto4]["precio_venta"])
+            compra_producto4 = float(self.inventario[producto4]["precio_compra"])
             total_compra_producto4 = compra_producto4 * venta4
+            total_valor_producto4 = valor_producto4 * venta4
         
         ingresos_totales_total = total_valor_producto1 + total_valor_producto2 + total_valor_producto3 + total_valor_producto4
         costos_total = total_compra_producto1 +  total_compra_producto2 +  total_compra_producto3 +  total_compra_producto4
@@ -286,7 +344,7 @@ class InventarioBarApp:
 
         # Actualizar etiqueta de ganancias del mes actual con formato de moneda colombiana
         self.lbl_ganancias_mes_actual.config(text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
-        messagebox.showinfo("Venta Registrada", f"Ganancia: {locale.currency(int(ganancia_total), grouping=True, symbol=False)}")
+        messagebox.showinfo("Venta Registrada", f"Cobrar : {locale.currency(int(ingresos_totales_total), grouping=True, symbol=False)}")
                 
         self.mostrar_inventario()
 
