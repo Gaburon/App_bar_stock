@@ -58,6 +58,14 @@ class InventarioBarApp:
         self.entry_precio_venta = tk.Entry(root, textvariable=self.precio_venta_var)
         self.entry_precio_venta.grid(row=3, column=1, padx=10, pady=10)
 
+        # Actualizar inventario
+        self.btn_update_inventario = tk.Button(root, text = "Actualizar inventario", command = self.actualizar_inventario)
+        self.btn_update_inventario.grid(row = 7, column = 1, columnspan = 2, pady=10)
+
+        # Borrar item inventario
+        self.btn_update_inventario = tk.Button(root, text = "Borrar Objeto del inventario", command = self.borrar_item)
+        self.btn_update_inventario.grid(row = 8, column = 1, columnspan = 2, pady=10)
+
         # Nuevos campos para cantidad de stock
         self.lbl_cantidad_stock = tk.Label(root, text="Cantidad de Stock:")
         self.lbl_cantidad_stock.grid(row=4, column=0, padx=10, pady=10)
@@ -152,7 +160,7 @@ class InventarioBarApp:
 
         # Mostrar inventario
         style=ttk.Style()
-
+        
         style.configure("Treeview.Heading", font=('Arial bold',15))
 
         self.my_tree['columns']=("Nombre", "Precio", "Cantidad")
@@ -178,7 +186,38 @@ class InventarioBarApp:
         # Guardar inventario y ganancias del mes al cerrar la aplicación
         root.protocol("WM_DELETE_WINDOW", self.guardar_inventario_y_ganancias_mes_al_cerrar)
 
-    #def eliminar_item(self):
+    def borrar_item(self):
+        producto = self.producto_var.get()
+
+        if producto not in self.inventario:
+            messagebox.showerror("Error", "verifica que el producto este en el inventario.")
+        else:
+            del self.inventario[producto]
+
+        self.mostrar_inventario()
+        self.cargar_inventario()
+
+    def actualizar_inventario(self):
+        producto = self.producto_var.get()
+
+        precio_venta = self.precio_venta_var.get()
+        precio_compra = self.precio_compra_var.get()
+
+        try:
+            stock = int(self.cantidad_stock_var.get())
+        except ValueError:
+            stock = self.inventario[producto]["stock"]
+
+        if producto not in self.inventario:
+            messagebox.showerror("Error", "verifica que el producto este en el inventario.")
+        else:
+            self.inventario[producto]["stock"] = stock
+            self.inventario[producto]["precio_venta"] = precio_venta
+            self.inventario[producto]["precio_compra"] = precio_compra
+            
+        self.mostrar_inventario()
+
+
 
     def organizar_nombres(self, tv, col, reverse):
         l = [(tv.set(k, col), k) for k in tv.get_children('')]
@@ -217,8 +256,12 @@ class InventarioBarApp:
         if producto_seleccionado in self.inventario:
             precio_compra = self.inventario[producto_seleccionado]["precio_compra"]
             precio_venta = self.inventario[producto_seleccionado]["precio_venta"]
-            self.precio_compra_var.set(locale.currency(int(precio_compra), grouping=True))
-            self.precio_venta_var.set(locale.currency(int(precio_venta), grouping=True))
+
+            precio_compra_float = locale.atof(precio_compra.strip(' $').replace(',', ''))
+            precio_venta_float = locale.atof(precio_venta.strip(' $').replace(',', ''))
+
+            self.precio_compra_var.set(locale.currency(precio_compra_float))
+            self.precio_venta_var.set(locale.currency(precio_venta_float))
         
         self.mostrar_inventario()
             
@@ -279,7 +322,7 @@ class InventarioBarApp:
         if producto4 not in self.inventario:
             producto4 = ""
             stock4 = -100
-        else:
+        else: 
             stock4 = self.inventario[producto4]["stock"]
 
         if venta1 >= stock1 and stock1 != -100:
@@ -294,6 +337,7 @@ class InventarioBarApp:
             compra_producto1 = float(self.inventario[producto1]["precio_compra"])
             total_compra_producto1 = compra_producto1 * venta1
             total_valor_producto1 = valor_producto1 * venta1
+            self.inventario[producto1]["stock"] -= venta1
 
         if venta2 >= stock2 and stock2 != -100 :
                 messagebox.showerror("Error", f"No hay suficientes unidades de {producto2} en el inventario.")
@@ -306,18 +350,20 @@ class InventarioBarApp:
             compra_producto2 = float(self.inventario[producto2]["precio_compra"])
             total_compra_producto2 = compra_producto2 * venta2
             total_valor_producto2 = valor_producto2 * venta2
+            self.inventario[producto2]["stock"] -= venta2
         
         if venta3 >= stock3 and stock3 != -100:
                 messagebox.showerror("Error", f"No hay suficientes unidades de {producto3} en el inventario.")
                 return
-        if stock2 == -100:
-            total_valor_producto2 = 0
-            total_compra_producto2 = 0
+        if stock3 == -100:
+            total_valor_producto3 = 0
+            total_compra_producto3 = 0
         else:
             valor_producto3 = float(self.inventario[producto3]["precio_venta"])
             compra_producto3 = float(self.inventario[producto3]["precio_compra"])
             total_compra_producto3 = compra_producto3 * venta3
             total_valor_producto3 = valor_producto3 * venta3
+            self.inventario[producto3]["stock"] -= venta3
         
         if venta4 >= stock4 and stock4 != -100:
                 messagebox.showerror("Error", f"No hay suficientes unidades de {producto4} en el inventario.")
@@ -330,6 +376,7 @@ class InventarioBarApp:
             compra_producto4 = float(self.inventario[producto4]["precio_compra"])
             total_compra_producto4 = compra_producto4 * venta4
             total_valor_producto4 = valor_producto4 * venta4
+            self.inventario[producto4]["stock"] -= venta4
         
         ingresos_totales_total = total_valor_producto1 + total_valor_producto2 + total_valor_producto3 + total_valor_producto4
         costos_total = total_compra_producto1 +  total_compra_producto2 +  total_compra_producto3 +  total_compra_producto4
@@ -390,10 +437,15 @@ class InventarioBarApp:
         try:
             with open("inventario.json", "r") as file:
                 inventario = json.load(file)
+            print("Loaded Inventory:")
+            for producto, detalles in inventario.items():
+                print(f"Producto: {producto}, Detalles: {detalles}")
             return inventario
         except FileNotFoundError:
+            print("FileNotFoundError: 'inventario.json' not found.")
             return {}
         except json.JSONDecodeError:
+            print("JSONDecodeError: Error decoding 'inventario.json'.")
             messagebox.showerror("Error", "Error al cargar el inventario desde el archivo.")
             return {}
 
@@ -411,12 +463,15 @@ class InventarioBarApp:
         for item in self.my_tree.get_children():
             self.my_tree.delete(item)
 
-        producto_seleccionado = self.producto_var.get()
-        for producto_seleccionado in self.inventario:
-            precio_venta = self.inventario[producto_seleccionado]["precio_venta"]
-            stock = self.inventario[producto_seleccionado]["stock"]
+        print("Current Inventory:", self.inventario)
 
-            self.my_tree.insert("", "end", values=(producto_seleccionado, locale.currency(int(precio_venta), grouping=True, symbol=False), stock), tags=('orow'))
+        for producto_seleccionado, values in self.inventario.items():
+            precio_venta = values["precio_venta"]
+            stock = values["stock"]
+
+            precio_venta_int = int(''.join(filter(str.isdigit, str(precio_venta))))
+
+            self.my_tree.insert("", "end", values=(producto_seleccionado, locale.currency(int(precio_venta_int), grouping=True, symbol=False), stock), tags=('orow'))
     
 if __name__ == "__main__":
     root = tk.Tk()

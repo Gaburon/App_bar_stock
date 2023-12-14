@@ -1,1 +1,2 @@
-{"jabon": {"precio_compra": 1000.0, "precio_venta": 2000.0, "stock": 514}, "pan": {"precio_compra": 1000.0, "precio_venta": 2000.0, "stock": 67}, "pueba": {"precio_compra": 10000.0, "precio_venta": 5000.0, "stock": 10}, "prueba": {"precio_compra": 10.0, "precio_venta": 5.0, "stock": 110}, "Cerveza": {"precio_compra": 2.5, "precio_venta": 3.0, "stock": 10}, "vino": {"precio_compra": 2000.0, "precio_venta": 3000.0, "stock": 0}}
+{
+}
