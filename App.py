@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
+from PIL import Image, ImageTk
 import json
 import locale
 
@@ -10,9 +11,20 @@ class InventarioBarApp:
     def __init__(self, root): 
         self.root = root
         self.root.title("Inventario Bar App")
-        self.root.geometry('1050x850')
+        self.root.geometry('1200x900')
         self.my_tree = ttk.Treeview(root)
 
+        # Cargar la imagen del logo
+        ruta_logo = "img/Imagen_logo.png"
+        img = Image.open(ruta_logo)
+        nuevo_ancho = 250  # Ajusta el ancho deseado
+        nuevo_alto = 250  # Ajusta el alto deseado
+        img = img.resize((nuevo_ancho, nuevo_alto), Image.BICUBIC)
+        self.fondo_image = ImageTk.PhotoImage(img)
+
+        # Crear un label para mostrar la imagen
+        self.logo_label = tk.Label(self.root, image=self.fondo_image)
+        self.logo_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         # Configurar formato de moneda colombiana (COP)
         locale.setlocale(locale.LC_ALL, 'es_CO.UTF-8')
 
@@ -31,156 +43,160 @@ class InventarioBarApp:
         self.ganancias_dia = 0
         self.ganancias_mes = 0
 
-        # Interfaz de usuario
-        # Manejo de inventario 
-        self.lbl_header = tk.Label(root, text="Manejo Inventario", font= ("Arial", 14, "bold"), fg= "red")
-        self.lbl_header.grid(row=0, column=1, padx=10, pady=10)
+        # Restablecer la posición de los elementos después de agregar la imagen de fondo
+        self.configurar_interfaz()
 
-        self.lbl_producto = tk.Label(root, text="Producto:")
-        self.lbl_producto.grid(row=1, column=0, padx=10, pady=10)
+        # Interfaz de usuario
+    def configurar_interfaz(self):
+        # Interfaz de usuario
+        self.lbl_header = tk.Label(self.root, text="Manejo Inventario", font=("Arial", 14, "bold"), fg="red")
+        self.lbl_header.place(relx=0.17, rely=0.05, anchor=tk.CENTER)
+
+        # Manejo de inventario
+        self.lbl_producto = tk.Label(self.root, text="Producto:")
+        self.lbl_producto.place(relx=0.1, rely=0.15)
 
         self.producto_var = tk.StringVar()
-        self.cmb_producto = ttk.Combobox(root, textvariable=self.producto_var, values=list(self.inventario.keys()))
-        self.cmb_producto.grid(row=1, column=1, padx=10, pady=10)
+        self.cmb_producto = ttk.Combobox(self.root, textvariable=self.producto_var, values=list(self.inventario.keys()))
+        self.cmb_producto.place(relx=0.19, rely=0.15)
         self.cmb_producto.bind("<<ComboboxSelected>>", self.actualizar_precios)
 
-        self.lbl_precio_compra = tk.Label(root, text="Precio de Compra:")
-        self.lbl_precio_compra.grid(row=2, column=0, padx=10, pady=10)
+        self.lbl_precio_compra = tk.Label(self.root, text="Precio de Compra:")
+        self.lbl_precio_compra.place(relx=0.1, rely=0.20)
 
         self.precio_compra_var = tk.StringVar()
-        self.entry_precio_compra = tk.Entry(root, textvariable=self.precio_compra_var)
-        self.entry_precio_compra.grid(row=2, column=1, padx=10, pady=10)
+        self.entry_precio_compra = tk.Entry(self.root, textvariable=self.precio_compra_var)
+        self.entry_precio_compra.place(relx=0.2, rely=0.20)
 
-        self.lbl_precio_venta = tk.Label(root, text="Precio de Venta:")
-        self.lbl_precio_venta.grid(row=3, column=0, padx=10, pady=10)
+        self.lbl_precio_venta = tk.Label(self.root, text="Precio de Venta:")
+        self.lbl_precio_venta.place(relx=0.1, rely=0.25)
 
         self.precio_venta_var = tk.StringVar()
-        self.entry_precio_venta = tk.Entry(root, textvariable=self.precio_venta_var)
-        self.entry_precio_venta.grid(row=3, column=1, padx=10, pady=10)
+        self.entry_precio_venta = tk.Entry(self.root, textvariable=self.precio_venta_var)
+        self.entry_precio_venta.place(relx=0.2, rely=0.25)
 
         # Actualizar inventario
-        self.btn_update_inventario = tk.Button(root, text = "Actualizar inventario", command = self.actualizar_inventario)
-        self.btn_update_inventario.grid(row = 7, column = 1, columnspan = 2, pady=10)
+        self.btn_update_inventario = tk.Button(self.root, text="Actualizar inventario", command=self.actualizar_inventario)
+        self.btn_update_inventario.place(relx=0.15, rely=0.4, anchor=tk.CENTER)
 
         # Borrar item inventario
-        self.btn_update_inventario = tk.Button(root, text = "Borrar Objeto del inventario", command = self.borrar_item)
-        self.btn_update_inventario.grid(row = 8, column = 1, columnspan = 2, pady=10)
+        self.btn_borrar_item = tk.Button(self.root, text="Borrar Objeto del inventario", command=self.borrar_item)
+        self.btn_borrar_item.place(relx=0.27, rely=0.4, anchor=tk.CENTER)
 
         # Nuevos campos para cantidad de stock
-        self.lbl_cantidad_stock = tk.Label(root, text="Cantidad de Stock:")
-        self.lbl_cantidad_stock.grid(row=4, column=0, padx=10, pady=10)
+        self.lbl_cantidad_stock = tk.Label(self.root, text="Cantidad de Stock:")
+        self.lbl_cantidad_stock.place(relx=0.1, rely=0.30)
 
         self.cantidad_stock_var = tk.StringVar()
-        self.entry_cantidad_stock = tk.Entry(root, textvariable=self.cantidad_stock_var)
-        self.entry_cantidad_stock.grid(row=4, column=1, padx=10, pady=10)
+        self.entry_cantidad_stock = tk.Entry(self.root, textvariable=self.cantidad_stock_var)
+        self.entry_cantidad_stock.place(relx=0.2, rely=0.30)
 
-        self.btn_agregar_stock = tk.Button(root, text="Agregar Stock", command=self.agregar_stock)
-        self.btn_agregar_stock.grid(row=7, column=0, columnspan=2, pady=10)
+        self.btn_agregar_stock = tk.Button(self.root, text="Agregar Stock", command=self.agregar_stock)
+        self.btn_agregar_stock.place(relx=0.24, rely=0.5, anchor=tk.CENTER)
 
-        self.btn_agregar_producto = tk.Button(root, text="Agregar Producto", command=self.agregar_producto)
-        self.btn_agregar_producto.grid(row=8, column=0, columnspan=2, pady=10)
+        self.btn_agregar_producto = tk.Button(self.root, text="Agregar Producto", command=self.agregar_producto)
+        self.btn_agregar_producto.place(relx=0.15, rely=0.5, anchor=tk.CENTER)
 
         # GANANCIAS MESSSSSSS
-        self.lbl_ganancias_mes_actual = tk.Label(root, text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
-        self.lbl_ganancias_mes_actual.grid(row=10, column=0, columnspan=2, pady=10)
+        self.lbl_ganancias_mes_actual = tk.Label(self.root, text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
+        self.lbl_ganancias_mes_actual.place(relx=0.2, rely=0.8, anchor=tk.CENTER)
 
-        self.btn_limpiar_registro_mes = tk.Button(root, text="Limpiar Registro del Mes", command=self.limpiar_registro_mes)
-        self.btn_limpiar_registro_mes.grid(row=11, column=0, columnspan=2, pady=10)
-        
-        # Interfas de ventas
-        self.lbl_header = tk.Label(root, text="Ventas", font= ("Arial", 14, "bold"), fg= "red")
-        self.lbl_header.grid(row=0, column=3, padx=10, pady=10)
+        self.btn_limpiar_registro_mes = tk.Button(self.root, text="Limpiar Registro del Mes", command=self.limpiar_registro_mes)
+        self.btn_limpiar_registro_mes.place(relx=0.2, rely=0.85, anchor=tk.CENTER)
+
+        # Interfaz de ventas
+        self.lbl_header_ventas = tk.Label(self.root, text="Ventas", font=("Arial", 14, "bold"), fg="red")
+        self.lbl_header_ventas.place(relx=0.8, rely=0.05, anchor=tk.CENTER)
 
         #1
-        self.lbl_producto_venta1 = tk.Label(root, text="Producto de venta 1:")
-        self.lbl_producto_venta1.grid(row=1, column=2, padx=10, pady=10)
+        self.lbl_producto_venta1 = tk.Label(self.root, text="Producto de venta 1:")
+        self.lbl_producto_venta1.place(relx=0.48, rely=0.15)
 
         self.producto_venta1_var = tk.StringVar()
-        self.cmb_producto_venta1 = ttk.Combobox(root, textvariable=self.producto_venta1_var, values=list(self.inventario.keys()))
-        self.cmb_producto_venta1.grid(row=1, column=3, padx=10, pady=10)
+        self.cmb_producto_venta1 = ttk.Combobox(self.root, textvariable=self.producto_venta1_var, values=list(self.inventario.keys()))
+        self.cmb_producto_venta1.place(relx=0.58, rely=0.15)
         self.cmb_producto_venta1.bind("<<ComboboxSelected>>", self.actualizar_precios)
 
-        self.lbl_cantidad_venta1 = tk.Label(root, text="Cantidad:")
-        self.lbl_cantidad_venta1.grid(row=1, column=4, padx=10, pady=10)
+        self.lbl_cantidad_venta1 = tk.Label(self.root, text="Cantidad:")
+        self.lbl_cantidad_venta1.place(relx=0.7, rely=0.15)
 
         self.cantidad_venta1_var = tk.StringVar()
-        self.entry_cantidad_venta1 = tk.Entry(root, textvariable=self.cantidad_venta1_var)
-        self.entry_cantidad_venta1.grid(row=1, column=5, padx=10, pady=10)
+        self.entry_cantidad_venta1 = tk.Entry(self.root, textvariable=self.cantidad_venta1_var)
+        self.entry_cantidad_venta1.place(relx=0.75, rely=0.15)
 
-        #2
-        self.lbl_producto_venta2 = tk.Label(root, text="Producto de venta 2:")
-        self.lbl_producto_venta2.grid(row=2, column=2, padx=10, pady=10)
+        # 2
+        self.lbl_producto_venta2 = tk.Label(self.root, text="Producto de venta 2:")
+        self.lbl_producto_venta2.place(relx=0.48, rely=0.20)
 
         self.producto_venta2_var = tk.StringVar()
-        self.cmb_producto_venta2 = ttk.Combobox(root, textvariable=self.producto_venta2_var, values=list(self.inventario.keys()))
-        self.cmb_producto_venta2.grid(row=2, column=3, padx=10, pady=10)
+        self.cmb_producto_venta2 = ttk.Combobox(self.root, textvariable=self.producto_venta2_var, values=list(self.inventario.keys()))
+        self.cmb_producto_venta2.place(relx=0.58, rely=0.20)
         self.cmb_producto_venta2.bind("<<ComboboxSelected>>", self.actualizar_precios)
 
-        self.lbl_cantidad_venta2 = tk.Label(root, text="Cantidad:")
-        self.lbl_cantidad_venta2.grid(row=2, column=4, padx=10, pady=10)
+        self.lbl_cantidad_venta2 = tk.Label(self.root, text="Cantidad:")
+        self.lbl_cantidad_venta2.place(relx=0.7, rely=0.20)
 
         self.cantidad_venta2_var = tk.StringVar()
-        self.entry_cantidad_venta2 = tk.Entry(root, textvariable=self.cantidad_venta2_var)
-        self.entry_cantidad_venta2.grid(row=2, column=5, padx=10, pady=10)
-
-        #3
-        self.lbl_producto_venta3 = tk.Label(root, text="Producto de venta 3:")
-        self.lbl_producto_venta3.grid(row=3, column=2, padx=10, pady=10)
+        self.entry_cantidad_venta2 = tk.Entry(self.root, textvariable=self.cantidad_venta2_var)
+        self.entry_cantidad_venta2.place(relx=0.75, rely=0.20)
+        # 3
+        self.lbl_producto_venta3 = tk.Label(self.root, text="Producto de venta 3:")
+        self.lbl_producto_venta3.place(relx=0.48, rely=0.25)
 
         self.producto_venta3_var = tk.StringVar()
-        self.cmb_producto_venta3 = ttk.Combobox(root, textvariable=self.producto_venta3_var, values=list(self.inventario.keys()))
-        self.cmb_producto_venta3.grid(row=3, column=3, padx=10, pady=10)
-
+        self.cmb_producto_venta3 = ttk.Combobox(self.root, textvariable=self.producto_venta3_var, values=list(self.inventario.keys()))
+        self.cmb_producto_venta3.place(relx=0.58, rely=0.25)
         self.cmb_producto_venta3.bind("<<ComboboxSelected>>", self.actualizar_precios)
-        self.lbl_cantidad_venta3 = tk.Label(root, text="Cantidad:")
-        self.lbl_cantidad_venta3.grid(row=3, column=4, padx=10, pady=10)
+
+        self.lbl_cantidad_venta3 = tk.Label(self.root, text="Cantidad:")
+        self.lbl_cantidad_venta3.place(relx=0.7, rely=0.25)
 
         self.cantidad_venta3_var = tk.StringVar()
-        self.entry_cantidad_venta3 = tk.Entry(root, textvariable=self.cantidad_venta3_var)
-        self.entry_cantidad_venta3.grid(row=3, column=5, padx=10, pady=10)
-        
-        #4
-        self.lbl_producto_venta4 = tk.Label(root, text="Producto de venta 4:")
-        self.lbl_producto_venta4.grid(row=4, column=2, padx=10, pady=10)
+        self.entry_cantidad_venta3 = tk.Entry(self.root, textvariable=self.cantidad_venta3_var)
+        self.entry_cantidad_venta3.place(relx=0.75, rely=0.25)
+
+        # 4
+        self.lbl_producto_venta4 = tk.Label(self.root, text="Producto de venta 4:")
+        self.lbl_producto_venta4.place(relx=0.48, rely=0.30)
 
         self.producto_venta4_var = tk.StringVar()
-        self.cmb_producto_venta4 = ttk.Combobox(root, textvariable=self.producto_venta4_var, values=list(self.inventario.keys()))
-        self.cmb_producto_venta4.grid(row=4, column=3, padx=10, pady=10)
-
+        self.cmb_producto_venta4 = ttk.Combobox(self.root, textvariable=self.producto_venta4_var, values=list(self.inventario.keys()))
+        self.cmb_producto_venta4.place(relx=0.58, rely=0.30)
         self.cmb_producto_venta4.bind("<<ComboboxSelected>>", self.actualizar_precios)
-        self.lbl_cantidad_venta4 = tk.Label(root, text="Cantidad:")
-        self.lbl_cantidad_venta4.grid(row=4, column=4, padx=10, pady=10)
+
+        self.lbl_cantidad_venta4 = tk.Label(self.root, text="Cantidad:")
+        self.lbl_cantidad_venta4.place(relx=0.7, rely=0.30)
 
         self.cantidad_venta4_var = tk.StringVar()
-        self.entry_cantidad_venta4 = tk.Entry(root, textvariable=self.cantidad_venta4_var)
-        self.entry_cantidad_venta4.grid(row=4, column=5, padx=10, pady=10)
+        self.entry_cantidad_venta4 = tk.Entry(self.root, textvariable=self.cantidad_venta4_var)
+        self.entry_cantidad_venta4.place(relx=0.75, rely=0.30)
 
-        self.btn_registrar_venta = tk.Button(root, text="Registrar Venta", command=self.registrar_venta)
-        self.btn_registrar_venta.grid(row=6, column=2, columnspan=2, pady=10)
+        self.btn_registrar_venta = tk.Button(self.root, text="Registrar Venta", command=self.registrar_venta)
+        self.btn_registrar_venta.place(relx=0.8, rely=0.45)
 
         # Mostrar inventario
-        style=ttk.Style()
-        
-        style.configure("Treeview.Heading", font=('Arial bold',15))
+        style = ttk.Style()
 
-        self.my_tree['columns']=("Nombre", "Precio", "Cantidad")
-        self.my_tree.column("#0", width=0, stretch=NO)
-        self.my_tree.column("Nombre", anchor=W, width=200)
-        self.my_tree.column("Precio", anchor=W, width=150)
-        self.my_tree.column("Cantidad", anchor=W, width=150)
+        style.configure("Treeview.Heading", font=('Arial bold', 15))
+        style.configure("Vertical.TScrollbar", width=40)
+
+        self.my_tree['columns'] = ("Nombre", "Precio", "Cantidad")
+        self.my_tree.column("#0", width=0, stretch=tk.NO)
+        self.my_tree.column("Nombre", anchor=tk.W, width=200)
+        self.my_tree.column("Precio", anchor=tk.W, width=150)
+        self.my_tree.column("Cantidad", anchor=tk.W, width=150)
 
         self.my_tree.heading("Nombre", text="Nombre", anchor=tk.W)
         self.my_tree.heading("Precio", text="Precio", anchor=tk.W)
         self.my_tree.heading("Cantidad", text="Cantidad", anchor=tk.W)
-
-        scrollbar = ttk.Scrollbar(root, orient="vertical", command=self.my_tree.yview)
-        scrollbar.grid(row=10, column=6, sticky="ns")
+        scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.my_tree.yview, style="Vertical.TScrollbar")
+        scrollbar.place(relx=0.90, rely=0.8, anchor=tk.CENTER)
 
         self.mostrar_inventario()
-        self.my_tree.tag_configure('orow', background="#EEEEEE", font=('Arial bold',15))
-        self.my_tree.grid(row=10, column=2, columnspan=5, padx=10, pady=10)
+        self.my_tree.tag_configure('orow', background="#EEEEEE", font=('Arial bold', 15))
+        self.my_tree.place(relx=0.7, rely=0.8, anchor=tk.CENTER)
 
-        self.my_tree.heading("Nombre", text="Nombre", anchor = tk.W, command = lambda: 
+        self.my_tree.heading("Nombre", text="Nombre", anchor=tk.W, command=lambda:
                              self.organizar_nombres(self.my_tree, "Nombre", False))
 
         # Guardar inventario y ganancias del mes al cerrar la aplicación
@@ -216,8 +232,6 @@ class InventarioBarApp:
             self.inventario[producto]["precio_compra"] = precio_compra
             
         self.mostrar_inventario()
-
-
 
     def organizar_nombres(self, tv, col, reverse):
         l = [(tv.set(k, col), k) for k in tv.get_children('')]
@@ -266,6 +280,8 @@ class InventarioBarApp:
         self.mostrar_inventario()
             
     def registrar_venta(self):
+        precio_compra = float(self.precio_compra_var.get().replace('$', '').replace(',', ''))
+        precio_venta = float(self.precio_venta_var.get().replace('$', '').replace(',', ''))
         producto1 = self.producto_venta1_var.get()
         producto2 = self.producto_venta2_var.get()
         producto3 = self.producto_venta3_var.get()
