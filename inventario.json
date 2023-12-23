@@ -1,2 +1,1 @@
-{
-}
+{"prueba1": {"precio_compra": 1000.0, "precio_venta": 2000.0, "stock": 198, "stock_inicial": 100}, "prueba2": {"precio_compra": 1000.0, "precio_venta": 3000.0, "stock": 200, "stock_inicial": 0}}

@@ -12,6 +12,7 @@ class InventarioBarApp:
     def __init__(self, root): 
         self.root = root
         self.root.title("Inventario Bar App")
+
         self.root.geometry('1200x900')
         self.my_tree = ttk.Treeview(root)
 
@@ -26,6 +27,7 @@ class InventarioBarApp:
         # Crear un label para mostrar la imagen
         self.logo_label = tk.Label(self.root, image=self.fondo_image)
         self.logo_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
         # Configurar formato de moneda colombiana (COP)
         locale.setlocale(locale.LC_ALL, 'es_CO.UTF-8')
 
@@ -83,6 +85,14 @@ class InventarioBarApp:
         # Borrar item inventario
         self.btn_borrar_item = tk.Button(self.root, text="Borrar Objeto del inventario", command=self.borrar_item)
         self.btn_borrar_item.place(relx=0.27, rely=0.4, anchor=tk.CENTER)
+
+        # Manipulacion stock inicial
+        self.btn_borrar_stock_inicial = tk.Button(self.root, text="Actualizar Stock Inicial", command=self.actualizar_stock_inicial)
+        self.btn_borrar_stock_inicial.place(relx=0.17, rely=0.6, anchor=tk.CENTER)
+
+        self.cantida_stock_inicial_var = tk.StringVar()
+        self.cantida_stock_inicial = tk.Entry(self.root, textvariable=self.cantida_stock_inicial_var)
+        self.cantida_stock_inicial.place(relx=0.25, rely=0.6)
 
         # Nuevos campos para cantidad de stock
         self.lbl_cantidad_stock = tk.Label(self.root, text="Cantidad de Stock:")
@@ -185,17 +195,21 @@ class InventarioBarApp:
         style.configure("Treeview.Heading", font=('Arial bold', 15))
         style.configure("Vertical.TScrollbar", width=40)
 
-        self.my_tree['columns'] = ("Nombre", "Precio", "Cantidad")
+        self.my_tree['columns'] = ("Nombre", "Precio", "Cantidad", "Cantidad Inicial")
         self.my_tree.column("#0", width=0, stretch=tk.NO)
         self.my_tree.column("Nombre", anchor=tk.W, width=200)
         self.my_tree.column("Precio", anchor=tk.W, width=150)
         self.my_tree.column("Cantidad", anchor=tk.W, width=150)
+        self.my_tree.column("Cantidad Inicial", anchor=tk.W, width=150)
+
+
 
         self.my_tree.heading("Nombre", text="Nombre", anchor=tk.W)
         self.my_tree.heading("Precio", text="Precio", anchor=tk.W)
         self.my_tree.heading("Cantidad", text="Cantidad", anchor=tk.W)
+        self.my_tree.heading("Cantidad Inicial", text="Cantidad Inicial", anchor=tk.W)
         scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.my_tree.yview, style="Vertical.TScrollbar")
-        scrollbar.place(relx=0.90, rely=0.8, anchor=tk.CENTER)
+        scrollbar.place(relx=0.98, rely=0.8, anchor=tk.CENTER)
 
         self.mostrar_inventario()
         self.my_tree.tag_configure('orow', background="#EEEEEE", font=('Arial bold', 15))
@@ -206,7 +220,26 @@ class InventarioBarApp:
 
         # Guardar inventario y ganancias del mes al cerrar la aplicación
         root.protocol("WM_DELETE_WINDOW", self.guardar_inventario_y_ganancias_mes_al_cerrar)
+        
+    def actualizar_stock_inicial(self):
+        producto = self.producto_var.get()
 
+        if producto in self.inventario:
+            try:
+                stock_inicial = int(self.cantida_stock_inicial_var.get())
+                if stock_inicial < 0:
+                     raise ValueError("La cantidad inicial debe ser un número no negativo.")
+            except ValueError as e:
+                messagebox.showerror("Error", f"Error en la cantidad inicial: {str(e)}")
+                return
+
+            self.inventario[producto]["stock_inicial"] = stock_inicial
+            messagebox.showinfo("Stock Inicial Actualizado", f"Stock inicial de {producto} actualizado a {stock_inicial}.")
+        else:
+            messagebox.showerror("Error", "Producto no encontrado en el inventario.")
+        
+        self.mostrar_inventario()
+        
     def borrar_item(self):
         producto = self.producto_var.get()
 
@@ -457,6 +490,7 @@ class InventarioBarApp:
     def agregar_stock(self):
         producto = self.producto_var.get()
         cantidad_stock = self.cantidad_stock_var.get()
+        stock_actual = self.inventario[producto]["stock"]
 
         try:
             cantidad_stock = int(cantidad_stock)
@@ -465,10 +499,14 @@ class InventarioBarApp:
         except ValueError as e:
             messagebox.showerror("Error", f"Error en la cantidad de stock: {str(e)}")
             return
+        
+        if stock_actual == 0:
+                self.inventario[producto]["stock_inicial"] = cantidad_stock
 
         if producto in self.inventario:
             self.inventario[producto]["stock"] += cantidad_stock
             messagebox.showinfo("Stock Actualizado", f"Se agregaron {cantidad_stock} unidades de {producto} al stock.")
+            
         else:
             messagebox.showerror("Error", "Producto no encontrado en el inventario.")
         
@@ -486,7 +524,7 @@ class InventarioBarApp:
                 messagebox.showerror("Error", f"Error en los precios: {str(e)}")
                 return
 
-            self.inventario[producto] = {"precio_compra": precio_compra, "precio_venta": precio_venta, "stock": 0}
+            self.inventario[producto] = {"precio_compra": precio_compra, "precio_venta": precio_venta, "stock": 0, "stock_inicial": 0}
             messagebox.showinfo("Producto Agregado", f"Se ha agregado el producto: {producto}")
             self.cmb_producto['values'] = list(self.inventario.keys())  # Actualizar las opciones del Combobox
         else:
@@ -530,10 +568,9 @@ class InventarioBarApp:
         for producto_seleccionado, values in self.inventario.items():
             precio_venta = values["precio_venta"]
             stock = values["stock"]
-
-            precio_venta_int = int(''.join(filter(str.isdigit, str(precio_venta))))
-
-            self.my_tree.insert("", "end", values=(producto_seleccionado, int(precio_venta), stock), tags=('orow'))
+            stock_inicial = values.get("stock_inicial")
+            
+            self.my_tree.insert("", "end", values=(producto_seleccionado, int(precio_venta), stock, stock_inicial), tags=('orow'))
     
 if __name__ == "__main__":
     try:
