@@ -5,6 +5,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 import json
 import locale
+from tkinter.simpledialog import askfloat
 
 class InventarioBarApp:
 
@@ -33,10 +34,8 @@ class InventarioBarApp:
 
         # Cargar ganancias del mes desde el archivo
         self.ganancias_mes_actual = self.cargar_ganancias_mes()
-
-        # Variables para seguimiento de ganancias y costos
-        self.ingresos_totales = 0
-        self.costos_totales = 0
+        self.ingresos_totales = self.cargar_ingresos_totales()
+        
 
         # Varibla contador de ganancias
         self.ganancias_venta = 0
@@ -45,6 +44,8 @@ class InventarioBarApp:
 
         # Restablecer la posición de los elementos después de agregar la imagen de fondo
         self.configurar_interfaz()
+
+        self.actualizar_ingresos_totales()
 
         # Interfaz de usuario
     def configurar_interfaz(self):
@@ -98,10 +99,14 @@ class InventarioBarApp:
         self.btn_agregar_producto.place(relx=0.15, rely=0.5, anchor=tk.CENTER)
 
         # GANANCIAS MESSSSSSS
-        self.lbl_ganancias_mes_actual = tk.Label(self.root, text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
+        self.lbl_ganancias_mes_actual = tk.Label(self.root, text=f"Ganancias: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
         self.lbl_ganancias_mes_actual.place(relx=0.2, rely=0.8, anchor=tk.CENTER)
 
-        self.btn_limpiar_registro_mes = tk.Button(self.root, text="Limpiar Registro del Mes", command=self.limpiar_registro_mes)
+        # Etiqueta para mostrar ingresos totales
+        self.lbl_ingresos_totales = tk.Label(self.root, text=f"Ingresos totales: {locale.currency(int(self.ingresos_totales), grouping=True, symbol=False)}")
+        self.lbl_ingresos_totales.place(relx=0.2, rely=0.75, anchor=tk.CENTER)
+
+        self.btn_limpiar_registro_mes = tk.Button(self.root, text="Limpiar Registro", command=self.limpiar_registro_mes)
         self.btn_limpiar_registro_mes.place(relx=0.2, rely=0.85, anchor=tk.CENTER)
 
         # Interfaz de ventas
@@ -244,8 +249,15 @@ class InventarioBarApp:
         
     def limpiar_registro_mes(self):
         self.ganancias_mes_actual = 0
-        self.lbl_ganancias_mes_actual.config(text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
+        self.ingresos_totales = 0
+
+        # Actualizar las etiquetas correspondientes
+        self.lbl_ganancias_mes_actual.config(text=f"Ganancias: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
+        self.lbl_ingresos_totales.config(text=f"Ingresos totales: {locale.currency(int(self.ingresos_totales), grouping=True, symbol=False)}")
+
+        # Guardar las actualizaciones
         self.guardar_ganancias_mes()
+        self.guardar_ingresos_totales()
 
     def cargar_ganancias_mes(self):
         try:
@@ -257,6 +269,27 @@ class InventarioBarApp:
         except json.JSONDecodeError:
             messagebox.showerror("Error", "Error al cargar las ganancias del mes desde el archivo.")
             return 0
+
+    def cargar_ingresos_totales(self):
+        try:
+            with open("ingresos_totales.json", "r") as file:
+                ingresos_totales = json.load(file)
+            return ingresos_totales.get("ingresos_totales", 0)
+        except FileNotFoundError:
+            return 0
+        except json.JSONDecodeError:
+            messagebox.showerror("Error", "Error al cargar los ingresos totales desde el archivo.")
+            return 0
+    def guardar_ingresos_totales(self):
+        try:
+            with open("ingresos_totales.json", "w") as file:
+                json.dump({"ingresos_totales": self.ingresos_totales}, file)
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al guardar los ingresos totales: {str(e)}")
+
+    def actualizar_ingresos_totales(self):
+        self.lbl_ingresos_totales.config(text=f"Ingresos totales: {locale.currency(int(self.ingresos_totales), grouping=True, symbol=False)}")
+        self.guardar_ingresos_totales()
 
     def guardar_ganancias_mes(self):
         try:
@@ -345,7 +378,6 @@ class InventarioBarApp:
             compra_producto1 = float(self.inventario[producto1]["precio_compra"])
             total_compra_producto1 = compra_producto1 * venta1
             total_valor_producto1 = valor_producto1 * venta1
-            self.inventario[producto1]["stock"] -= venta1
 
         # Verificación y ajuste del stock para venta2
         if venta2 > stock2 and stock2 != -100:
@@ -357,7 +389,6 @@ class InventarioBarApp:
             compra_producto2 = float(self.inventario[producto2]["precio_compra"])
             total_compra_producto2 = compra_producto2 * venta2
             total_valor_producto2 = valor_producto2 * venta2
-            self.inventario[producto2]["stock"] -= venta2
 
         # Verificación y ajuste del stock para venta3
         if venta3 > stock3 and stock3 != -100:
@@ -369,7 +400,6 @@ class InventarioBarApp:
             compra_producto3 = float(self.inventario[producto3]["precio_compra"])
             total_compra_producto3 = compra_producto3 * venta3
             total_valor_producto3 = valor_producto3 * venta3
-            self.inventario[producto3]["stock"] -= venta3
 
         # Verificación y ajuste del stock para venta4
         if venta4 > stock4 and stock4 != -100:
@@ -381,7 +411,6 @@ class InventarioBarApp:
             compra_producto4 = float(self.inventario[producto4]["precio_compra"])
             total_compra_producto4 = compra_producto4 * venta4
             total_valor_producto4 = valor_producto4 * venta4
-            self.inventario[producto4]["stock"] -= venta4
 
         ingresos_totales_total = total_valor_producto1 + total_valor_producto2 + total_valor_producto3 + total_valor_producto4
         costos_total = total_compra_producto1 +  total_compra_producto2 +  total_compra_producto3 +  total_compra_producto4
@@ -392,9 +421,36 @@ class InventarioBarApp:
 
         self.ganancias_mes_actual += ganancias_venta
 
+        self.ingresos_totales += ingresos_totales_total
+        # Obtener el monto con el que se va a pagar
+        monto_pagado = askfloat("Pago", "Ingrese el monto con el que se va a pagar:")
+        
+        if monto_pagado is None or monto_pagado < ingresos_totales_total:
+            # Mostrar mensaje de pago insuficiente y no realizar la venta
+            messagebox.showerror("Pago Insuficiente", "El monto pagado no es suficiente. No se registrará la venta.")
+            return
+
+        # Calcular el cambio
+        cambio = monto_pagado - ingresos_totales_total
+
+        # Modificar el inventario después de verificar el pago
+        for producto, cantidad_vendida in zip([producto1, producto2, producto3, producto4], [venta1, venta2, venta3, venta4]):
+            if producto != "" and producto in self.inventario:
+                self.inventario[producto]["stock"] -= cantidad_vendida
+        # Restablecer los campos de cantidad
+        self.cantidad_venta1_var.set("")  
+        self.cantidad_venta2_var.set("")  
+        self.cantidad_venta3_var.set("")  
+        self.cantidad_venta4_var.set("")  
+
         # Actualizar etiqueta de ganancias del mes actual con formato de moneda colombiana
-        self.lbl_ganancias_mes_actual.config(text=f"Ganancias del mes actual: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
-        messagebox.showinfo("Venta Registrada", f"Cobrar : {locale.currency(int(ingresos_totales_total), grouping=True, symbol=False)}")
+        self.actualizar_ingresos_totales()
+        self.lbl_ganancias_mes_actual.config(text=f"Ganancias: {locale.currency(int(self.ganancias_mes_actual), grouping=True, symbol=False)}")
+        
+        # Mostrar mensaje de venta registrada
+        messagebox.showinfo("Venta Registrada", f"Cobrar : {locale.currency(int(ingresos_totales_total), grouping=True, symbol=False)}\n"
+        f"Cambio : {locale.currency(int(cambio), grouping=True, symbol=False)}\n"
+        f"Ganancia : {locale.currency(int(ganancia_total), grouping=True, symbol=False)}")
 
         self.mostrar_inventario()
 
@@ -462,6 +518,7 @@ class InventarioBarApp:
     def guardar_inventario_y_ganancias_mes_al_cerrar(self):
         self.guardar_inventario()
         self.guardar_ganancias_mes()
+        self.guardar_ingresos_totales()
         self.root.destroy()
 
     def mostrar_inventario(self):
